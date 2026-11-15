@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment Variables and Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets.json
+
+# AI Models and Weights
+models/
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.bin
+
+# Generated Data
+data/processed/
+data/cache/
+data/temp/
+data/tmp/
+
+# Keep NASA Raw Datasets
+!data/raw/
+
+# Logs and Temporary Files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.prof
+*.profiler
+profile.prof
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Test and Coverage Reports
+.coverage
+htmlcov/
+coverage.xml

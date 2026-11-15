@@ -1,0 +1,230 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Environmental Data Explorer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="js/app.js" defer></script>
+</head>
+
+<body>
+    <div class="shell">
+        <main>
+
+            <section class="filterbar" aria-label="Data filters">
+                <label class="filter filter-region">
+                    <span>STUDY REGION</span>
+                    <select id="region"></select>
+                </label>
+
+                <div class="filter filter-indicator">
+                    <span>DATA INDICATOR</span>
+
+                    <div class="indicator-group">
+                        <select id="indicator"></select>
+                        <select id="indicator2" hidden></select>
+
+                        <button
+                            id="toggleIndicator"
+                            type="button"
+                            title="Add comparison variable"
+                            aria-label="Add comparison variable"
+                        >+</button>
+                    </div>
+                </div>
+
+                <label class="filter filter-period">
+                    <span>TIME RANGE</span>
+
+                    <select id="period">
+                        <option value="all">Full available record</option>
+                        <option value="20">Last 20 years</option>
+                        <option value="10">Last 10 years</option>
+                    </select>
+                </label>
+            </section>
+
+            <div
+                class="load-status"
+                id="loadStatus"
+                role="status"
+                aria-live="polite"
+                hidden
+            >
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Updating visualization...</span>
+            </div>
+
+            <section class="dashboard-grid" id="dashboardGrid">
+
+                <article class="panel chart-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <div class="section-kicker">DATA EXPLORER</div>
+                            <h2 id="chartTitle">Historical observations</h2>
+                            <p id="chartSubtitle"></p>
+                        </div>
+
+                        <div class="chart-actions">
+                            <span class="chart-status">
+                                ● NASA observations
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="chart-view-switch" role="group" aria-label="Visualization type">
+                        <button type="button" class="chart-view active" data-view="trend" aria-pressed="true">Trend</button>
+                        <button type="button" class="chart-view" data-view="seasonal" aria-pressed="false">Seasonal</button>
+                        <button type="button" class="chart-view" data-view="anomalies" aria-pressed="false">Anomalies</button>
+                    </div>
+                    <div id="seasonalNote" class="seasonal-note" hidden></div>
+                    <div
+                        id="trendChart"
+                        class="trend-chart"
+                        role="img"
+                        aria-label="Historical time-series chart"
+                    ></div>
+
+                    <div class="chart-footer">
+                        <span id="sourceLabel"></span>
+                        <span id="rangeLabel"></span>
+                    </div>
+                </article>
+
+                <aside class="panel ai-panel">
+                    <div class="ai-head">
+                        <div class="section-kicker">RESEARCH ASSISTANT</div>
+
+                        <div
+                            class="ai-toggle"
+                            role="group"
+                            aria-label="Analysis mode"
+                        >
+                            <button
+                                type="button"
+                                class="mode active"
+                                data-mode="interpret"
+                                aria-pressed="true"
+                            >Interpret</button>
+
+                            <button
+                                type="button"
+                                class="mode"
+                                data-mode="predict"
+                                aria-pressed="false"
+                            >Predict</button>
+                        </div>
+                    </div>
+
+                    <div class="ai-identity">
+                        <div class="sparkle" aria-hidden="true">✳</div>
+
+                        <div>
+                            <h2 id="aiHeading">Understand the signal</h2>
+                            <p id="aiSubheading">
+                                NASA statistical interpretation
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="ai-content"
+                        id="aiContent"
+                        aria-live="polite"
+                    ></div>
+
+                    <div class="ai-bottom">
+                        <div class="ai-notice">
+                            <span aria-hidden="true">ⓘ</span>
+                            <span>
+                                AI interpretations and forecasts are experimental.
+                            </span>
+                        </div>
+
+                        <form id="askForm" class="ask-box">
+                            <textarea
+                                id="question"
+                                rows="2"
+                                placeholder="Ask about this trend..."
+                                aria-label="Ask a question"
+                            ></textarea>
+
+                            <button
+                                type="submit"
+                                aria-label="Submit question"
+                                title="Submit question"
+                            >↑</button>
+                        </form>
+                    </div>
+                </aside>
+
+                <div
+                    class="metric-row"
+                    id="metricRow"
+                    aria-label="Key statistics"
+                >
+                    <article class="metric-card">
+                        <div class="metric-top">
+                            <span>MEAN VALUE</span>
+                            <span class="metric-icon">∿</span>
+                        </div>
+
+                        <strong id="meanMetric">—</strong>
+                        <small id="meanUnit">—</small>
+                        <p>Average across selected years</p>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-top">
+                            <span>HIGHEST VALUE</span>
+                            <span class="metric-icon">↗</span>
+                        </div>
+
+                        <strong id="maxMetric">—</strong>
+                        <small id="maxUnit">—</small>
+                        <p id="maxYear">Peak observation</p>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-top">
+                            <span>LINEAR TREND</span>
+                            <span class="metric-icon">⌁</span>
+                        </div>
+
+                        <strong id="trendMetric">—</strong>
+                        <small id="trendUnit">—</small>
+                        <p>Preliminary trend estimate</p>
+                    </article>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                <span>NASA Earth Science Data</span>
+                <span>
+                    Historical trends and experimental forecasts.
+                    Results require scientific validation.
+                </span>
+            </footer>
+
+        </main>
+    </div>
+</body>
+
+</html>
